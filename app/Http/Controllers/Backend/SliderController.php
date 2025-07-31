@@ -8,7 +8,7 @@ use App\Models\ImageMedia;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\SLiderRequest;
+use App\Http\Requests\SliderRequest;
 
 class SliderController extends Controller
 {
@@ -32,7 +32,7 @@ class SliderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(SLiderRequest $request)
+    public function store(SliderRequest $request)
     {
 
 
