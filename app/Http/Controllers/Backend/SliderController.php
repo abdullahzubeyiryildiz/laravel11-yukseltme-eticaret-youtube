@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Backend;
 
-use ImageResize;
 use App\Models\Slider;
 use App\Models\ImageMedia;
 use Illuminate\Support\Str;

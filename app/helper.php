@@ -1,5 +1,7 @@
 <?php
 
+use Intervention\Image\Facades\Image;
+
 
 if (!function_exists('generateOTP')) {
     function generateOTP($n){
@@ -42,7 +44,7 @@ if (!function_exists('resimyukle')) {
             $image->move(public_path($yol),$dosyadi.'.'.$uzanti);
             $imageurl = $yol.$dosyadi.'.'.$uzanti;
         }else {
-            $image = ImageResize::make($image);
+            $image = Image::make($image);
             $image->encode('webp', 75)->save($yol.$dosyadi.'.webp');
             $imageurl = $yol.$dosyadi.'.webp';
         }
@@ -150,11 +152,15 @@ if (!function_exists('strLimit')) {
             $onlyName = implode('', explode('.' . $extension, $fullName));
             $filename =  Str::slug($onlyName) . '-' . time(); //generateOTP(6).'-'.time();
 
+            // Public klasörüne doğrudan yükle
+            $publicPath = public_path($pathyol);
+            klasorac($publicPath);
+
             if ($image->extension() == 'svg' || $image->extension() == 'webp' || $image->extension() == 'pdf' || $image->extension() == 'ico') {
                 $orjinalurl = $pathyol . $filename . '.' . $image->extension();
 
-
-                \Illuminate\Support\Facades\Storage::disk('public')->putFileAs('',$image->path(), $orjinalurl);
+                // Dosyayı doğrudan public klasörüne kopyala
+                $image->move($publicPath, $filename . '.' . $image->extension());
 
                 $imagear['orj'] = $orjinalurl;
 
@@ -167,23 +173,29 @@ if (!function_exists('strLimit')) {
 
             } else {
                 $orjinalurl = $pathyol . $filename . '.webp';
-                \Illuminate\Support\Facades\Storage::disk('public')->put($orjinalurl, \ImageResize::make($image->path())->encode('webp', 90));
+
+                // WebP formatında kaydet
+                $img = Image::make($image->path());
+                $img->encode('webp', 90);
+                $img->save($publicPath . $filename . '.webp');
 
                 $imagear['orj'] = $orjinalurl;
 
                 if(!empty($paththumb)) {
-
                     $thumbnailurl = $paththumb . 'thumb_' . $filename . '.webp';
-                    \Illuminate\Support\Facades\Storage::disk('public')->put($thumbnailurl, \ImageResize::make($image->path())
-                    ->resize($with, $height, function ($constraint) {$constraint->aspectRatio();})
-                    ->encode('webp', 90));
+
+                    // Thumbnail oluştur
+                    $thumbImg = Image::make($image->path());
+                    $thumbImg->resize($with, $height, function ($constraint) {
+                        $constraint->aspectRatio();
+                    });
+                    $thumbImg->encode('webp', 90);
+                    $thumbImg->save(public_path($thumbnailurl));
 
                     $imagear['thum'] = $thumbnailurl;
                 }else {
                     $imagear['thum'] = NULL;
                 }
-
-
             }
 
             return  $imagear;
